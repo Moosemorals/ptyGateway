@@ -1,3 +1,4 @@
+
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <poll.h>
@@ -67,15 +68,15 @@ void copy(int fdIn, int fdOut) {
 }
 
 void child(int minion) {
-  if (dup2(minion, STDIN_FILENO) == -1) {
+  if (dup2(STDIN_FILENO, minion) == -1) {
       perror("Can't dup2 stdin to minion");
       exit(EXIT_FAILURE);
     }
-    if (dup2(minion, STDOUT_FILENO) == -1) {
+    if (dup2(STDOUT_FILENO, minion) == -1) {
       perror("Can't dup2 stdout to minion");
       exit(EXIT_FAILURE);
     }
-    if (dup2(minion, STDERR_FILENO) == -1) {
+    if (dup2(STDERR_FILENO,minion) == -1) {
       perror("Can't dup2 stderr to minion");
       exit(EXIT_FAILURE);
     }
@@ -88,7 +89,7 @@ void child(int minion) {
     exit(EXIT_FAILURE);
 }
 
-void parent(leader) {
+void parent(int leader) {
   
     struct pollfd *pfds = calloc(2, sizeof(struct pollfd));
     if (pfds == NULL) {
@@ -137,6 +138,7 @@ int main() {
   }
 
   pid_t pid = fork();
+  
   if (pid == 0) {
     // Child
     child(minion);
@@ -149,3 +151,4 @@ int main() {
     exit(EXIT_FAILURE);
   }
 }
+
