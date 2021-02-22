@@ -9,20 +9,24 @@ Create pty
   *  [grantpt]
   *  [unlockpt]
 
-Create pipe(s?) [see](https://stackoverflow.com/a/14171149/195833)
-
 Fork
 
 In child
   * Open slave pty
-  * Setup stdin/stdout
-  * (Still thinking about stderr)
+  * [dup] to setup stdin/stdout/stderr
+       * MVP - stderr muxed with stdout
+       * v2 - stderr over pipe?
+  * [exec] target process
+
+In parent
+  * start [select] loop
+      * Read from stdin -> write to pty master
+      * Read from pty master -> write to stdout
   
 
-
-
-[posix_openpt]: https://man7.org/linux/man-pages/man3/posix_openpt.3.html
+[dup]: https://man7.org/linux/man-pages/man2/dup.2.html
+[exec]: https://man7.org/linux/man-pages/man3/exec.3.html
 [grantpt]: https://man7.org/linux/man-pages/man3/grantpt.3.html
-[unockpt]: https://man7.org/linux/man-pages/man3/grantpt.3.html
-
-
+[posix_openpt]: https://man7.org/linux/man-pages/man3/posix_openpt.3.html
+[select]: https://man7.org/linux/man-pages/man2/select.2.html
+[unlockpt]: https://man7.org/linux/man-pages/man3/grantpt.3.html
