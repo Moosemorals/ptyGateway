@@ -66,18 +66,8 @@ void copy(int fdIn, int fdOut) {
   }
 }
 
-int main() {
-
-  int leader, minion;
-  if (!open_pty(&leader, &minion)) {
-    perror("Can't open pesudo TTY");
-    exit(EXIT_FAILURE);
-  }
-
-  pid_t pid = fork();
-  if (pid == 0) {
-    // Child
-    if (dup2(minion, STDIN_FILENO) == -1) {
+void child(int minion) {
+  if (dup2(minion, STDIN_FILENO) == -1) {
       perror("Can't dup2 stdin to minion");
       exit(EXIT_FAILURE);
     }
@@ -96,10 +86,10 @@ int main() {
     execve("/bin/bash", argv, envp);
     perror("Can't run bash");
     exit(EXIT_FAILURE);
-           
-  } else if (pid > 0) {
-    // parent
-    
+}
+
+void parent(leader) {
+  
     struct pollfd *pfds = calloc(2, sizeof(struct pollfd));
     if (pfds == NULL) {
       perror("Can't allocate memory for poll");
@@ -137,6 +127,23 @@ int main() {
         }      
       }
     }      
+}
+
+int main() {
+  int leader, minion;
+  if (!open_pty(&leader, &minion)) {
+    perror("Can't open pesudo TTY");
+    exit(EXIT_FAILURE);
+  }
+
+  pid_t pid = fork();
+  if (pid == 0) {
+    // Child
+    child(minion);
+           
+  } else if (pid > 0) {
+    // parent
+    parent(leader);
   } else {
     perror("Fork failed");
     exit(EXIT_FAILURE);
