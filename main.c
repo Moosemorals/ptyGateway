@@ -60,7 +60,7 @@ void copy(int fdIn, int fdOut) {
       exit(EXIT_FAILURE);
     } else if (w != r) {
       // TODO: Handle this better
-      fprintf(stderr, "Wrote %d bytes, should have written %d\n", w, r);
+      fprintf(stderr, "Wrote %ld bytes, should have written %ld\n", w, r);
       exit(EXIT_FAILURE);    
     }   
   }
@@ -81,7 +81,7 @@ int main() {
       perror("Can't dup2 stdin to minion");
       exit(EXIT_FAILURE);
     }
-    if (dup2(minion, STOUT_FILENO) == -1) {
+    if (dup2(minion, STDOUT_FILENO) == -1) {
       perror("Can't dup2 stdout to minion");
       exit(EXIT_FAILURE);
     }
@@ -90,8 +90,8 @@ int main() {
       exit(EXIT_FAILURE);
     }
     
-    const char *const argv[] = {"bash", NULL};
-    const char *const envp[] = { NULL };
+    char * argv[] = {"bash", NULL};
+    char * envp[] = { NULL };
     
     execve("/bin/bash", argv, envp);
     perror("Can't run bash");
@@ -122,7 +122,7 @@ int main() {
       
       if (pfds[0].revents != 0) {
         if (pfds[0].revents & POLLIN) {
-          copy(pfds[0], STDOUT_FILENO);
+          copy(pfds[0].fd, STDOUT_FILENO);
         } else {
           fprintf(stderr, "pty closed unexpectedly\n");
           exit(EXIT_FAILURE);
@@ -130,7 +130,7 @@ int main() {
       }
       if (pfds[1].revents != 0) {
         if (pfds[1].revents & POLLIN) {
-          copy(pfds[1], leader);
+          copy(pfds[1].fd, leader);
         } else {
           fprintf(stderr, "pty closed unexpectedly\n");
           exit(EXIT_FAILURE);
